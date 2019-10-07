@@ -1,0 +1,12 @@
+{
+  "name": "hyperapp-hangman-part-1",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@hyperapp/events": "^0.0.3",
+    "@hyperapp/html": "^1.1.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "hyperapp": "^2.0.0-beta.25"
+  }
+}
