@@ -12,6 +12,11 @@
   resolved "https://registry.yarnpkg.com/@hyperapp/html/-/html-1.1.1.tgz#8040666e8f935eed95f2034f443cc8768866d992"
   integrity sha512-jRlz/ED0y/pAseqAwKlJxdy78Lf7AEeykOGeYxnGE1TY0tF4SgVW53Sh72QJoGWZmrgtcHN6wKPZAmEenDCsgQ==
 
+"@hyperapp/http@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@hyperapp/http/-/http-0.0.1.tgz#5835ba020ec9aa46ca4acececeb41ac219d4e8e1"
+  integrity sha512-yF7eQoaWAskbykp9K3rCiujPWvJ6VW4a6my867li/ke8Mjd8VT0zodlXabxHi9K+Ii1BggZECbL+pqGRBtZZsg==
+
 babel-plugin-syntax-object-rest-spread@^6.8.0:
   version "6.13.0"
   resolved "https://registry.yarnpkg.com/babel-plugin-syntax-object-rest-spread/-/babel-plugin-syntax-object-rest-spread-6.13.0.tgz#fd6536f2bce13836ffa3a5458c4903a597bb3bf5"
