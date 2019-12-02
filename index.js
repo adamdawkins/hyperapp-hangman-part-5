@@ -3,8 +3,8 @@ import {
   div,
   h1,
   h2,
-  ul,
-  li,
+  img,
+  p,
   span,
   input,
   label,
@@ -21,17 +21,28 @@ const MAX_BAD_GUESSES = 7;
 
 const contains = (list, item) => list.indexOf(item) > -1;
 
+const range = length => {
+  const result = [];
+  let i = 1;
+  while (i <= length) {
+    result.push(i);
+    i++;
+  }
+
+  return result;
+};
+
 // HELPERS
 const isGuessed = (letter, state) => contains(state.guesses, letter);
 const isInWord = (letter, state) => contains(state.word, letter);
 
-const badGuesses = state =>
+const getBadGuesses = state =>
   state.guesses.filter(guess => !isInWord(guess, state));
 
 const isVictorious = state =>
   state.word.every(letter => isGuessed(letter, state));
 
-const isGameOver = state => badGuesses(state).length >= MAX_BAD_GUESSES;
+const isGameOver = state => getBadGuesses(state).length >= MAX_BAD_GUESSES;
 
 // EFFECTS
 
@@ -59,18 +70,18 @@ const WordLetter = (letter, guessed) =>
   span({ class: "letter" }, guessed ? letter : mdash);
 
 const Word = state =>
-  h1(
-    {},
+  div(
+    { class: "word" },
     state.word.map(letter => WordLetter(letter, isGuessed(letter, state)))
   );
 
-const BadGuesses = state => [
-  h2({}, "Your Guesses:"),
-  ul(
-    { class: "guesses" },
-    badGuesses(state).map(guess => li({ class: "guess" }, guess))
-  )
-];
+const BadGuesses = guesses =>
+  div({ class: "guesses" }, [
+    range(MAX_BAD_GUESSES - guesses.length).map(life =>
+      span({ class: "guess" }, "♥️")
+    ),
+    guesses.map(guess => span({ class: "guess linethrough" }, guess))
+  ]);
 
 const UserInput = letter =>
   form({ onSubmit: preventDefault(GuessLetter) }, [
@@ -104,13 +115,24 @@ app({
     getWord()
   ],
   view: state =>
-    div(
-      {},
-      isGameOver(state)
-        ? h1({}, `Game Over! The word was "${state.word.join("")}"`)
-        : isVictorious(state)
-        ? [h1({}, "You Won!"), Word(state)]
-        : [UserInput(state.guessedLetter), Word(state), BadGuesses(state)]
-    ),
+    div({}, [
+      div({ class: "header" }, [
+        div([h1("Hangman."), h2({ class: "subtitle" }, "A hyperapp game")]),
+        div({}, BadGuesses(getBadGuesses(state)))
+      ]),
+      state.word.length > 0 &&
+        (isGameOver(state)
+          ? h2({}, `Game Over! The word was "${state.word.join("")}"`)
+          : isVictorious(state)
+          ? [h2({}, "You Won!"), Word(state)]
+          : [
+              Word(state),
+              p(
+                { style: { textAlign: "center" } },
+                "Type a letter to have a guess."
+              ),
+              UserInput(state.guessedLetter)
+            ])
+    ]),
   node: document.getElementById("app")
 });

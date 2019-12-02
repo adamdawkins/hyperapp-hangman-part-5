@@ -1,7 +1,52 @@
+body {
+  box-sizing: border-box;
+  font-family: 'Helvetica Neue', Helvetica, sans-serif;
+  padding: 1rem 2rem;
+  background: #f0f0f0;
+}
+h1 {
+  font-size: 5rem;
+  margin: 1rem 0;
+}
+
+.subtitle {
+  font-size: 2rem;
+}
+
+.word {
+  font-size: 4rem;
+  display: flex;
+  justify-content: center;
+}
+
+.accent {
+  color: #fccd30;
+}
+
 .input {
   border: 2px solid black;
   font-size: 36px;
   width: 1.5em;
   margin: 0 1em;
   text-align: center;
+}
+
+.guesses {
+  font-size: 2rem;
+  display: flex;
+}
+
+.guess {
+  margin: 0 .5em;
+}
+
+.linethrough {
+  text-decoration: line-through;
+}
+
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
 }
