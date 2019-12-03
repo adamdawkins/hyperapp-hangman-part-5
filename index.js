@@ -44,13 +44,35 @@ const isVictorious = state =>
 
 const isGameOver = state => getBadGuesses(state).length >= MAX_BAD_GUESSES;
 
+const isPlaying = state => !(isGameOver(state) || isVictorious(state));
+
+const keyCodeIsLetter = keyCode => keyCode >= 65 && keyCode <= 90;
+
+const isNewLetter = (state, letter) => !contains(state.guesses, letter);
+
+const getInitialState = () => [
+  {
+    guesses: [],
+    word: []
+  },
+  getWord()
+];
+
 // EFFECTS
+
+const getWord = () =>
+  get({
+    url: `https://adamdawkins.uk/randomword.json`,
+    expect: "json",
+    action: SetWord
+  });
 
 // ACTIONS
 
 const GuessLetter = (state, event) =>
-  // the letter keycodes range from 65-90
-  contains(range(65, 90), event.keyCode)
+  isPlaying(state) &&
+  keyCodeIsLetter(event.keyCode) &&
+  isNewLetter(state, event.key)
     ? {
         ...state,
         guesses: state.guesses.concat([event.key])
@@ -61,6 +83,8 @@ const SetWord = (state, { word }) => ({
   ...state,
   word: word.split("")
 });
+
+const ResetGame = getInitialState();
 
 // VIEWS
 
@@ -81,45 +105,40 @@ const BadGuesses = guesses =>
     guesses.map(guess => span({ class: "guess linethrough" }, guess))
   ]);
 
-const getWord = () =>
-  get({
-    url: `https://adamdawkins.uk/randomword.json`,
-    expect: "json",
-    action: SetWord
-  });
+const PlayAgain = () => button({ onclick: ResetGame }, "Play again");
+
+const Header = state =>
+  div({ class: "header" }, [
+    div([h1("Hangman."), h2({ class: "subtitle" }, "A hyperapp game")]),
+    div({}, BadGuesses(getBadGuesses(state)))
+  ]);
+
+const GameOver = state => [
+  h2({}, `Game Over! The word was "${state.word.join("")}"`),
+  PlayAgain()
+];
+
+const Victory = state => [h2({}, "You Won!"), PlayAgain(), Word(state)];
+
+const TheGame = state => [
+  Word(state),
+  p({ style: { textAlign: "center" } }, "Type a letter to have a guess.")
+];
 
 // THE APP
 
 app({
-  init: [
-    {
-      word: ["h", "e", "l", "l", "o"],
-      guesses: [],
-      guessedLetter: ""
-    }
-    // getWord()
-  ],
-  view: state => {
-    console.log(state);
-    return div({}, [
-      div({ class: "header" }, [
-        div([h1("Hangman."), h2({ class: "subtitle" }, "A hyperapp game")]),
-        div({}, BadGuesses(getBadGuesses(state)))
-      ]),
+  init: getInitialState(),
+  view: state =>
+    div({}, [
+      Header(state),
       state.word.length > 0 &&
         (isGameOver(state)
-          ? h2({}, `Game Over! The word was "${state.word.join("")}"`)
+          ? GameOver(state)
           : isVictorious(state)
-          ? [h2({}, "You Won!"), Word(state)]
-          : [
-              Word(state),
-              p(
-                { style: { textAlign: "center" } },
-                "Type a letter to have a guess."
-              )
-            ])
-    ]);
-  },
+          ? Victory(state)
+          : TheGame(state))
+    ]),
   subscriptions: () => [onKeyDown(GuessLetter)],
   node: document.getElementById("app")
 });
