@@ -12,7 +12,7 @@ import {
   button
 } from "@hyperapp/html";
 import { get } from "@hyperapp/http";
-import { targetValue, preventDefault } from "@hyperapp/events";
+import { targetValue, preventDefault, onKeyDown } from "@hyperapp/events";
 
 const mdash = "\u2014";
 const MAX_BAD_GUESSES = 7;
@@ -21,10 +21,10 @@ const MAX_BAD_GUESSES = 7;
 
 const contains = (list, item) => list.indexOf(item) > -1;
 
-const range = length => {
+const range = (start, end) => {
   const result = [];
-  let i = 1;
-  while (i <= length) {
+  let i = start;
+  while (i <= end) {
     result.push(i);
     i++;
   }
@@ -48,16 +48,14 @@ const isGameOver = state => getBadGuesses(state).length >= MAX_BAD_GUESSES;
 
 // ACTIONS
 
-const GuessLetter = state => ({
-  ...state,
-  guesses: state.guesses.concat([state.guessedLetter]),
-  guessedLetter: ""
-});
-
-const SetGuessedLetter = (state, letter) => ({
-  ...state,
-  guessedLetter: letter
-});
+const GuessLetter = (state, event) =>
+  // the letter keycodes range from 65-90
+  contains(range(65, 90), event.keyCode)
+    ? {
+        ...state,
+        guesses: state.guesses.concat([event.key])
+      }
+    : state;
 
 const SetWord = (state, { word }) => ({
   ...state,
@@ -77,24 +75,10 @@ const Word = state =>
 
 const BadGuesses = guesses =>
   div({ class: "guesses" }, [
-    range(MAX_BAD_GUESSES - guesses.length).map(life =>
+    range(1, MAX_BAD_GUESSES - guesses.length).map(life =>
       span({ class: "guess" }, "♥️")
     ),
     guesses.map(guess => span({ class: "guess linethrough" }, guess))
-  ]);
-
-const UserInput = letter =>
-  form({ onSubmit: preventDefault(GuessLetter) }, [
-    label({}, "Your guess:"),
-    ,
-    input({
-      class: "input",
-      onInput: [SetGuessedLetter, targetValue],
-      type: "text",
-      value: letter,
-      maxlength: 1
-    }),
-    button({ type: "submit" }, "Guess!")
   ]);
 
 const getWord = () =>
@@ -103,19 +87,21 @@ const getWord = () =>
     expect: "json",
     action: SetWord
   });
+
 // THE APP
 
 app({
   init: [
     {
-      word: [],
+      word: ["h", "e", "l", "l", "o"],
       guesses: [],
       guessedLetter: ""
-    },
-    getWord()
+    }
+    // getWord()
   ],
-  view: state =>
-    div({}, [
+  view: state => {
+    console.log(state);
+    return div({}, [
       div({ class: "header" }, [
         div([h1("Hangman."), h2({ class: "subtitle" }, "A hyperapp game")]),
         div({}, BadGuesses(getBadGuesses(state)))
@@ -130,9 +116,10 @@ app({
               p(
                 { style: { textAlign: "center" } },
                 "Type a letter to have a guess."
-              ),
-              UserInput(state.guessedLetter)
+              )
             ])
-    ]),
+    ]);
+  },
+  subscriptions: () => [onKeyDown(GuessLetter)],
   node: document.getElementById("app")
 });
